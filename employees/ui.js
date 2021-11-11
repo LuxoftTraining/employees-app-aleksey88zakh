@@ -59,7 +59,7 @@ export function addEmployeeUI() {
     //add manager ref
     const managerId = document.getElementById("managerSelect").value;
     setEmployeeManager(id, managerId);
-    showEmployees(DATA.employees);
+    showEmployees(getEmployees());
 
     document.getElementById("name").value = "";
     document.getElementById("surname").value = "";
@@ -69,7 +69,7 @@ export function addEmployeeUI() {
 
 function removeEmployeeUI(id) {
     removeEmployee(id);
-    showEmployees(DATA.employees);
+    showEmployees(getEmployees());
     removeOption(document.getElementById("managerSelect"), id);
 }
 
@@ -101,7 +101,7 @@ function removeOption(select, id) {
 
 function getEmployeesOptions() {
     let options = [];
-    for (let e of DATA.employees) {
+    for (let e of getEmployees()) {
         options.push({ text: e.name + ' ' + e.surname, value: e.id });
     }
     return options;
@@ -149,7 +149,7 @@ function assignSendOnEnter(paneId, buttonId) {
         input.addEventListener("keyup", function (event) {
             event.preventDefault();
             if (event.keyCode === 13) {
-                document.querySelector("#" + paneId + " button").click();
+                document.querySelector("#" + buttonId + " button").click();
             }
         });
     }
@@ -157,7 +157,7 @@ function assignSendOnEnter(paneId, buttonId) {
 
 
 export function runUI() {
-    showEmployees(DATA.employees);
+    showEmployees(getEmployees());
     fillSelect(document.getElementById("managerSelect"),
         getEmployeesOptions());
     document.getElementById("searchButton").click();
