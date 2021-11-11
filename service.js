@@ -1,4 +1,8 @@
+import { DATA } from './employees-json';
+
 const employeeMap = {};
+
+export function getEmployees() { return DATA.employees }
 
 function findByName(name, surname) {
     let res = [];
@@ -11,7 +15,7 @@ function findByName(name, surname) {
     return res;
 }
 
-function addEmployee(name, surname) {
+export function addEmployee(name, surname) {
     if (!name || name.length==0 || !surname || surname.length==0) {
      throw new Error("name and surname should be not empty");
     }
@@ -24,7 +28,7 @@ function addEmployee(name, surname) {
     return id;
 }
 
-function removeEmployee(id) {
+export function removeEmployee(id) {
     let index = 0;
     for (let e of DATA.employees) {
      if (e.id===id) break;
@@ -49,7 +53,7 @@ function showEmployees() {
     }
 }
 
-function findById(id) {
+export function findById(id) {
     if (employeeMap[id]) {
      return employeeMap[id];
     }
@@ -134,10 +138,22 @@ function getEmployeeJSON(id) {
     return JSON.stringify(e);
 }
 
-function setEmployeeManager(id, managerId) {
+export function setEmployeeManager(id, managerId) {
     let employee = findById(id);
     if (employee) {
         employee.managerRef = managerId;
     }
+}
+
+export function searchEmployees(name, surname, managerRef) {
+    let results = [];
+    for (let e of DATA.employees) {
+        if ((!name || e.name == name) &&
+            (!surname || e.surname == surname) &&
+            (!managerRef || e.managerRef == managerRef)) {
+            results.push(e);
+        }
+    }
+    return results;
 }
    

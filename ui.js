@@ -1,3 +1,6 @@
+import { getEmployees, removeEmployee, addEmployee,
+    findById, searchEmployees, setEmployeeManager} from './service';   
+
 const PLACEHOLDER = "employeesPlaceholder";
 
 function clearEmployeesPlaceholder() {
@@ -36,7 +39,7 @@ function showEmployees(employees) {
     document.getElementById(PLACEHOLDER).appendChild(ul);
 }
 
-function addEmployeeUI() {
+export function addEmployeeUI() {
     let errorHTML = "";
     const name = document.getElementById("name").value;
     if (name == "") {
@@ -104,7 +107,7 @@ function getEmployeesOptions() {
     return options;
 }
 
-function searchEmployeeUI() {
+export function searchEmployeeUI() {
     const name = document.getElementById("nameSearch").value;
     const surname = document.getElementById("surnameSearch").value;
     const managerRef = document.getElementById("managerSearch").value;
@@ -113,24 +116,12 @@ function searchEmployeeUI() {
     showEmployees(employees);
 }
 
-function searchEmployees(name, surname, managerRef) {
-    let results = [];
-    for (let e of DATA.employees) {
-        if ((!name || e.name == name) &&
-            (!surname || e.surname == surname) &&
-            (!managerRef || e.managerRef == managerRef)) {
-            results.push(e);
-        }
-    }
-    return results;
-}
-
 /**
  * Активирует выбранный таб
  * @param evt событие, вызывающее активацию
  * @param id идентификатор таба
  */
-function openTab(evt, id) {
+export function openTab(evt, id) {
     // Определяем переменные
     var i, tabcontent, tablinks;
 
@@ -165,7 +156,7 @@ function assignSendOnEnter(paneId, buttonId) {
 }
 
 
-function runUI() {
+export function runUI() {
     showEmployees(DATA.employees);
     fillSelect(document.getElementById("managerSelect"),
         getEmployeesOptions());
