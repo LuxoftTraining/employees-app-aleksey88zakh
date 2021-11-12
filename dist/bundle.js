@@ -238,7 +238,7 @@ function showEmployees(employees) {
         ul.appendChild(li);
 
         li.innerHTML = employee;
-        /*
+        
         const removeButton = document.createElement("button");
         removeButton.innerHTML = "Удалить";
         removeButton.addEventListener('click',
@@ -257,7 +257,7 @@ function showEmployees(employees) {
             li.appendChild(managerSelect);
 
         }
-        */
+        
     }
     document.getElementById(PLACEHOLDER).appendChild(ul);
 }
@@ -399,12 +399,15 @@ function runUI() {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Employee": () => (/* binding */ Employee),
 /* harmony export */   "jsonToEmployees": () => (/* binding */ jsonToEmployees)
 /* harmony export */ });
 /* harmony import */ var _employees_employees_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../employees/employees-json */ "./employees/employees-json.js");
+/* harmony import */ var _Person__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Person */ "./model/Person.js");
 
 
-class Employee extends Person {
+
+class Employee extends _Person__WEBPACK_IMPORTED_MODULE_1__.Person {
     constructor(name, surname, department) {
         super(name, surname);
         this.department = department;
@@ -430,6 +433,71 @@ window.allEmployees = function () {
 }
 
 
+
+
+/***/ }),
+
+/***/ "./model/Person.js":
+/*!*************************!*\
+  !*** ./model/Person.js ***!
+  \*************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Person": () => (/* binding */ Person)
+/* harmony export */ });
+class Person {
+    constructor(name, surname) {
+        this.name = name;
+        this.surname = surname;
+    }
+
+    get fullName() {
+        return this.name + " " + this.surname;
+    }
+
+    get age() {
+        if (!this._dateOfBirth) return "";
+        let ageDiff = Date.now() - this._dateOfBirth.getTime();
+        let ageDate = new Date(ageDiff); // miliseconds from epoch
+        return " <b>Возраст:</b>" +
+            Math.abs(ageDate.getUTCFullYear() - 1970);
+    }
+
+    formatDate(date) {
+        let day = date.getDate();
+        if (day < 10) day = '0' + day;
+        let month = date.getMonth() + 1;
+        if (month < 10) month = '0' + month;
+        let year = date.getFullYear();
+        return day + '.' + month + '.' + year;
+    }
+
+    set dateOfBirth(date) {
+        this._dateOfBirth = new Date(date);
+    }
+
+    get dateOfBirth() {
+        return this._dateOfBirth ?
+            " <b>Дата рождения:</b> " + this.formatDate(this._dateOfBirth) :
+            "";
+    }
+
+    toString() {
+        const phones = this.phones ?
+            `Список телефонов: ${this.phones}` : '';
+        return `
+         ${this.fullName} \
+         ${this.dateOfBirth} ${this.age} ${phones}`;
+    }
+
+    static fromJSON(obj) {
+        return Object.assign(new Person(), obj)
+    }
+
+
+}
 
 
 /***/ }),
