@@ -19,7 +19,8 @@ const DATA = {
        id: 1,
        name: "Пафнутий",
        surname: "Пафнутьев",
-       department: "IT"
+       department: "IT",
+       dateOfBirth: "2000-01-01"
       }
       ]
    }   
@@ -218,6 +219,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "runUI": () => (/* binding */ runUI)
 /* harmony export */ });
 /* harmony import */ var _service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./service */ "./employees/service.js");
+/* harmony import */ var _model_Employee__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../model/Employee */ "./model/Employee.js");
+
    
 
 const PLACEHOLDER = "employeesPlaceholder";
@@ -230,12 +233,12 @@ function showEmployees(employees) {
     clearEmployeesPlaceholder();
     const ul = document.createElement("ul");
 
-    for (let employee of employees) {
+    for (let employee of (0,_model_Employee__WEBPACK_IMPORTED_MODULE_1__.jsonToEmployees)(employees)) {
         const li = document.createElement("li");
         ul.appendChild(li);
 
-        li.innerHTML = employee.name + " " + employee.surname;
-
+        li.innerHTML = employee;
+        /*
         const removeButton = document.createElement("button");
         removeButton.innerHTML = "Удалить";
         removeButton.addEventListener('click',
@@ -254,6 +257,7 @@ function showEmployees(employees) {
             li.appendChild(managerSelect);
 
         }
+        */
     }
     document.getElementById(PLACEHOLDER).appendChild(ul);
 }
@@ -383,6 +387,49 @@ function runUI() {
     assignSendOnEnter("searchPane", "searchEmployeesButton");
     assignSendOnEnter("addPane", "addEmployeeButton");
 }
+
+
+/***/ }),
+
+/***/ "./model/Employee.js":
+/*!***************************!*\
+  !*** ./model/Employee.js ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "jsonToEmployees": () => (/* binding */ jsonToEmployees)
+/* harmony export */ });
+/* harmony import */ var _employees_employees_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../employees/employees-json */ "./employees/employees-json.js");
+
+
+class Employee extends Person {
+    constructor(name, surname, department) {
+        super(name, surname);
+        this.department = department;
+    }
+
+    static fromJSON(obj) {
+        return Object.assign(new Employee(), obj)
+    }
+
+}
+
+function jsonToEmployees(employeesJSON) {
+    let employees = [];
+    for (let e of employeesJSON) {
+        employees.push(Employee.fromJSON(e));
+    }
+    return employees;
+}
+
+window.Employee = Employee;
+window.allEmployees = function () {
+    return jsonToEmployees(_employees_employees_json__WEBPACK_IMPORTED_MODULE_0__.DATA.employees);
+}
+
+
 
 
 /***/ }),
@@ -992,6 +1039,8 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _employees_ui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./employees/ui */ "./employees/ui.js");
 /* harmony import */ var _style_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./style.css */ "./style.css");
+/* harmony import */ var _model_Employee__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./model/Employee */ "./model/Employee.js");
+
 
 
 
