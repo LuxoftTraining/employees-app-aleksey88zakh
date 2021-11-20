@@ -6,6 +6,7 @@ export const DATA = {
        name: "Пафнутий",
        surname: "Пафнутьев",
        department: "IT",
+       salary: 1000,
        dateOfBirth: "2000-01-01"
       }
       ]
