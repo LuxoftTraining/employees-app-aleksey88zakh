@@ -4,6 +4,8 @@ const employeeMap = {};
 
 export function getEmployees() { return DATA.employees }
 
+export function setEmployees(employees) { DATA.employees = employees }
+
 function findByName(name, surname) {
     let res = [];
     for (var e of DATA.employees) {

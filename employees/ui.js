@@ -1,78 +1,124 @@
-import { getEmployees, removeEmployee, addEmployee,
-    findById, searchEmployees, setEmployeeManager} from './service';
-import {Employee,jsonToEmployees} from "../model/Employee";   
+import {
+    getEmployees, removeEmployee,
+    findById, searchEmployees
+} from './service';
+import { addEmployee, setEmployeeManager } from './service.pure';
+import { Employee, jsonToEmployees } from "../model/Employee";
+import { DATA } from './employees-json';
 
 const PLACEHOLDER = "employeesPlaceholder";
+const ADD_PANE = "addPane";
 
 function clearEmployeesPlaceholder() {
     document.getElementById(PLACEHOLDER).innerHTML = '';
 }
 
-function showEmployees(employees) {
-    clearEmployeesPlaceholder();
-    const ul = document.createElement("ul");
+function showEmployees(employeesJSON) {
+    let employees = jsonToEmployees(employeesJSON);
+    const html = showEmployeesView(getEmployees(), employees);
+    document.getElementById(PLACEHOLDER).innerHTML = html;
+}
 
-    for (let employee of jsonToEmployees(employees)) {
-        const li = document.createElement("li");
-        ul.appendChild(li);
+function showEmployeesView(allEmployees, employees) {
+    let li_items = employees.map(e =>
+        `<li>${e} <button onclick="removeEmployeeUI(${e.id})">X</button>
+        ${employeeManagerView(allEmployees, e.managerRef)}
+          </li>`).join("");
+    return `<ul>${li_items}</ul>`;
+}
 
-        li.innerHTML = employee;
-        
-        const removeButton = document.createElement("button");
-        removeButton.innerHTML = "Удалить";
-        removeButton.addEventListener('click',
-            () => removeEmployeeUI(employee.id));
-        li.appendChild(removeButton);
-
-        //show manager
-        if (employee.managerRef) {
-            const managerSpan = document.createElement("span");
-            const managerSelect = document.createElement("select");
-            fillSelect(managerSelect, getEmployeesOptions(), employee.managerRef);
-            managerSelect.addEventListener('change',
-                () => employee.managerRef = managerSelect.value);
-            managerSpan.innerHTML = " <b>Руководитель:</b> ";
-            li.appendChild(managerSpan);
-            li.appendChild(managerSelect);
-
+export function employeeManagerView(employees, selectedId, selectId) {
+    if (!selectedId) return "";
+    let values = employees.map(e => {
+        return {
+            text: e.name + " " + e.surname,
+            value: e.id,
+            selected: e.id === selectedId
         }
-        
+    });
+    return `<span>${selectView(values, selectId)}</span>`;
+}
+
+export function selectView(values, selectId) {
+    const values_html = values.map(v =>
+        `<option value="${v.value}" 
+         ${v.selected ? 'selected' : ''}>${v.text}</option>`
+    ).join("");
+    if (selectId) {
+        return `<select id="${selectId}">${values_html}</select>`;
+    } else {
+        return `<select>${values_html}</select>`;
     }
-    document.getElementById(PLACEHOLDER).appendChild(ul);
 }
 
 export function addEmployeeUI() {
-    let errorHTML = "";
-    const name = document.getElementById("name").value;
-    if (name == "") {
-        errorHTML += "- Имя сотрудника должно быть задано<br>";
-        document.getElementById("name").style.backgroundColor = '#FFEEEE';
-    }
-    const surname = document.getElementById("surname").value;
-    if (surname == "") {
-        errorHTML += "- Фамилия сотрудника должна быть задана<br>";
-        document.getElementById("surname").style.backgroundColor = '#FFEEEE';
-    }
-    document.getElementById("addEmployeeFormErrorMessage")
-        .innerHTML = errorHTML;
-    if (errorHTML.length != 0) return;
+    let employeeFromUI = getEmployeeFromUI();
+    let newEmployee = setEmployeeManager(employeeFromUI, getManagerIdFromUI());
+    let newEmployees = addEmployee(getEmployees(), newEmployee);
+    let html;
+    if (!!newEmployees) {
+        html = addEmployeeView(newEmployees, employeeFromUI);
+    } else {
+        html = addEmployeeView(getEmployees(), employeeFromUI);
+    } 
 
-    const id = addEmployee(name, surname);
-    //add manager ref
-    const managerId = document.getElementById("managerSelect").value;
-    setEmployeeManager(id, managerId);
-    showEmployees(getEmployees());
-
-    document.getElementById("name").value = "";
-    document.getElementById("surname").value = "";
-    addOption(document.getElementById("managerSelect"),
-        { text: name + ' ' + surname, value: id });
+    //showEmployees(getEmployees());
+    document.getElementById(ADD_PANE).innerHTML = html;
+    showEmployees(newEmployees);
+    return newEmployees;
 }
 
-function removeEmployeeUI(id) {
+export function addEmployeeView(employees, employee) {
+    let errors = errorView(employee);
+    let html = `<h3>Добавление сотрудника</h3>
+        <label for="name">Имя:</label>
+        <input id="name" placeholder="Имя">
+        <label for="surname">Фамилия:</label>
+        <input id="surname" placeholder="Фамилия"></input>
+        <label for="managerSelect">Менеджер:</label>
+        ${employeeManagerView(employees, 1, "managerSelect")}`;
+    if (!!errors) {
+        html += `${errors}`;
+    }
+    html += `<p>
+                <button onclick="setEmployees(addEmployeeUI())" id="addEmployeeButton">
+                Добавить сотрудника</button>
+            </p>`;
+    return html;
+}
+
+function getEmployeeFromUI() {
+    return {
+        name: document.getElementById("name").value,
+        surname: document.getElementById("surname").value
+    };
+}
+
+function getManagerIdFromUI() {
+    return document.getElementById("managerSelect").value;
+}
+
+function errorView(employee) {
+    let errorHTML = "";
+    if (employee.name == "") {
+        errorHTML += "- Имя сотрудника должно быть задано<br>";
+        //document.getElementById("name").style.backgroundColor = '#FFEEEE';
+    }
+    if (employee.surname == "") {
+        errorHTML += "- Фамилия сотрудника должна быть задана<br>";
+        //document.getElementById("surname").style.backgroundColor = '#FFEEEE';
+    }
+    if (errorHTML.length !== 0) {
+        return `<div id="addEmployeeFormErrorMessage">${errorHTML}</div>`;
+    } else {
+        return errorHTML;
+    }
+}
+
+export function removeEmployeeUI(id) {
     removeEmployee(id);
     showEmployees(getEmployees());
-    removeOption(document.getElementById("managerSelect"), id);
+    //removeOption(document.getElementById("managerSelect"), id);
 }
 
 function fillSelect(select, values, selectedValue) {
@@ -160,8 +206,8 @@ function assignSendOnEnter(paneId, buttonId) {
 
 export function runUI() {
     showEmployees(getEmployees());
-    fillSelect(document.getElementById("managerSelect"),
-        getEmployeesOptions());
+    //fillSelect(document.getElementById("managerSelect"),
+    //    getEmployeesOptions());
     document.getElementById("searchButton").click();
     assignSendOnEnter("searchPane", "searchEmployeesButton");
     assignSendOnEnter("addPane", "addEmployeeButton");

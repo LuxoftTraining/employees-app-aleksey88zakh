@@ -20,10 +20,36 @@ const DATA = {
        name: "Пафнутий",
        surname: "Пафнутьев",
        department: "IT",
+       salary: 1000,
        dateOfBirth: "2000-01-01"
+      },
+      {
+        id: 133,
+        name: "Иван",
+        surname: "Иванов",
+        department: "DBA",
+        salary: 1000,
+        phones: ["123-34-56", "234-56-81"],
+        dateOfBirth: "2000-02-01"
+      },
+      {
+        id: 134,
+        name: "Анна",
+        surname: "Петрова",
+        department: "Dev",
+        salary: 1000,
+        dateOfBirth: "2001-02-01"
+      },
+      {
+        id: 135,
+        name: "Николай",
+        surname: "Сидоров",
+        department: "QT",
+        salary: 1000,
+        dateOfBirth: "2001-01-01"
       }
       ]
-   }   
+   }
 
 /***/ }),
 
@@ -36,6 +62,7 @@ const DATA = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "getEmployees": () => (/* binding */ getEmployees),
+/* harmony export */   "setEmployees": () => (/* binding */ setEmployees),
 /* harmony export */   "addEmployee": () => (/* binding */ addEmployee),
 /* harmony export */   "removeEmployee": () => (/* binding */ removeEmployee),
 /* harmony export */   "findById": () => (/* binding */ findById),
@@ -48,6 +75,8 @@ __webpack_require__.r(__webpack_exports__);
 const employeeMap = {};
 
 function getEmployees() { return _employees_json__WEBPACK_IMPORTED_MODULE_0__.DATA.employees }
+
+function setEmployees(employees) { _employees_json__WEBPACK_IMPORTED_MODULE_0__.DATA.employees = employees }
 
 function findByName(name, surname) {
     let res = [];
@@ -205,6 +234,52 @@ function searchEmployees(name, surname, managerRef) {
 
 /***/ }),
 
+/***/ "./employees/service.pure.js":
+/*!***********************************!*\
+  !*** ./employees/service.pure.js ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "removeEmployee": () => (/* binding */ removeEmployee),
+/* harmony export */   "addEmployee": () => (/* binding */ addEmployee),
+/* harmony export */   "addPhone": () => (/* binding */ addPhone),
+/* harmony export */   "setDateOfBirth": () => (/* binding */ setDateOfBirth),
+/* harmony export */   "setEmployeeManager": () => (/* binding */ setEmployeeManager)
+/* harmony export */ });
+function removeEmployee(employees, id) {
+    return employees.filter(e=>e.id!==id);
+}
+
+function addEmployee(employees, newEmployee) {
+    if (!isFullNameValid(newEmployee)) {
+     throw new Error("name and surname should be not empty");
+    }
+    let id = Math.max.apply(null, employees.map(e=>e.id)) + 1;
+    return [...employees, {...newEmployee, id}];
+}
+
+function isFullNameValid(employee) {
+    return !!employee.name && employee.name.length!==0 && !!employee.surname && employee.surname.length!==0;
+}
+
+function addPhone(employee, phone) {
+    const phones = !!employee.phones ? employee.phones : [];
+    let newPhones = [...phones, phone]; 
+    return {...employee, phones: newPhones};
+}
+
+function setDateOfBirth(employee, date) {
+    return {...employee, dateOfBirth: date};
+}
+
+function setEmployeeManager(employee, managerId) {
+    return {...employee, managerRef: managerId}
+}
+
+/***/ }),
+
 /***/ "./employees/ui.js":
 /*!*************************!*\
   !*** ./employees/ui.js ***!
@@ -213,87 +288,137 @@ function searchEmployees(name, surname, managerRef) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "employeeManagerView": () => (/* binding */ employeeManagerView),
+/* harmony export */   "selectView": () => (/* binding */ selectView),
 /* harmony export */   "addEmployeeUI": () => (/* binding */ addEmployeeUI),
+/* harmony export */   "addEmployeeView": () => (/* binding */ addEmployeeView),
+/* harmony export */   "removeEmployeeUI": () => (/* binding */ removeEmployeeUI),
 /* harmony export */   "searchEmployeeUI": () => (/* binding */ searchEmployeeUI),
 /* harmony export */   "openTab": () => (/* binding */ openTab),
 /* harmony export */   "runUI": () => (/* binding */ runUI)
 /* harmony export */ });
 /* harmony import */ var _service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./service */ "./employees/service.js");
-/* harmony import */ var _model_Employee__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../model/Employee */ "./model/Employee.js");
+/* harmony import */ var _service_pure__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./service.pure */ "./employees/service.pure.js");
+/* harmony import */ var _model_Employee__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../model/Employee */ "./model/Employee.js");
+/* harmony import */ var _employees_json__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./employees-json */ "./employees/employees-json.js");
 
-   
+
+
+
 
 const PLACEHOLDER = "employeesPlaceholder";
+const ADD_PANE = "addPane";
 
 function clearEmployeesPlaceholder() {
     document.getElementById(PLACEHOLDER).innerHTML = '';
 }
 
-function showEmployees(employees) {
-    clearEmployeesPlaceholder();
-    const ul = document.createElement("ul");
+function showEmployees(employeesJSON) {
+    let employees = (0,_model_Employee__WEBPACK_IMPORTED_MODULE_2__.jsonToEmployees)(employeesJSON);
+    const html = showEmployeesView((0,_service__WEBPACK_IMPORTED_MODULE_0__.getEmployees)(), employees);
+    document.getElementById(PLACEHOLDER).innerHTML = html;
+}
 
-    for (let employee of (0,_model_Employee__WEBPACK_IMPORTED_MODULE_1__.jsonToEmployees)(employees)) {
-        const li = document.createElement("li");
-        ul.appendChild(li);
+function showEmployeesView(allEmployees, employees) {
+    let li_items = employees.map(e =>
+        `<li>${e} <button onclick="removeEmployeeUI(${e.id})">X</button>
+        ${employeeManagerView(allEmployees, e.managerRef)}
+          </li>`).join("");
+    return `<ul>${li_items}</ul>`;
+}
 
-        li.innerHTML = employee;
-        
-        const removeButton = document.createElement("button");
-        removeButton.innerHTML = "Удалить";
-        removeButton.addEventListener('click',
-            () => removeEmployeeUI(employee.id));
-        li.appendChild(removeButton);
-
-        //show manager
-        if (employee.managerRef) {
-            const managerSpan = document.createElement("span");
-            const managerSelect = document.createElement("select");
-            fillSelect(managerSelect, getEmployeesOptions(), employee.managerRef);
-            managerSelect.addEventListener('change',
-                () => employee.managerRef = managerSelect.value);
-            managerSpan.innerHTML = " <b>Руководитель:</b> ";
-            li.appendChild(managerSpan);
-            li.appendChild(managerSelect);
-
+function employeeManagerView(employees, selectedId, selectId) {
+    if (!selectedId) return "";
+    let values = employees.map(e => {
+        return {
+            text: e.name + " " + e.surname,
+            value: e.id,
+            selected: e.id === selectedId
         }
-        
+    });
+    return `<span>${selectView(values, selectId)}</span>`;
+}
+
+function selectView(values, selectId) {
+    const values_html = values.map(v =>
+        `<option value="${v.value}" 
+         ${v.selected ? 'selected' : ''}>${v.text}</option>`
+    ).join("");
+    if (selectId) {
+        return `<select id="${selectId}">${values_html}</select>`;
+    } else {
+        return `<select>${values_html}</select>`;
     }
-    document.getElementById(PLACEHOLDER).appendChild(ul);
 }
 
 function addEmployeeUI() {
+    let employeeFromUI = getEmployeeFromUI();
+    let newEmployee = (0,_service_pure__WEBPACK_IMPORTED_MODULE_1__.setEmployeeManager)(employeeFromUI, getManagerIdFromUI());
+    let newEmployees = (0,_service_pure__WEBPACK_IMPORTED_MODULE_1__.addEmployee)((0,_service__WEBPACK_IMPORTED_MODULE_0__.getEmployees)(), newEmployee);
+    let html;
+    if (!!newEmployees) {
+        html = addEmployeeView(newEmployees, employeeFromUI);
+    } else {
+        html = addEmployeeView((0,_service__WEBPACK_IMPORTED_MODULE_0__.getEmployees)(), employeeFromUI);
+    } 
+
+    //showEmployees(getEmployees());
+    document.getElementById(ADD_PANE).innerHTML = html;
+    showEmployees(newEmployees);
+    return newEmployees;
+}
+
+function addEmployeeView(employees, employee) {
+    let errors = errorView(employee);
+    let html = `<h3>Добавление сотрудника</h3>
+        <label for="name">Имя:</label>
+        <input id="name" placeholder="Имя">
+        <label for="surname">Фамилия:</label>
+        <input id="surname" placeholder="Фамилия"></input>
+        <label for="managerSelect">Менеджер:</label>
+        ${employeeManagerView(employees, 1, "managerSelect")}`;
+    if (!!errors) {
+        html += `${errors}`;
+    }
+    html += `<p>
+                <button onclick="setEmployees(addEmployeeUI())" id="addEmployeeButton">
+                Добавить сотрудника</button>
+            </p>`;
+    return html;
+}
+
+function getEmployeeFromUI() {
+    return {
+        name: document.getElementById("name").value,
+        surname: document.getElementById("surname").value
+    };
+}
+
+function getManagerIdFromUI() {
+    return document.getElementById("managerSelect").value;
+}
+
+function errorView(employee) {
     let errorHTML = "";
-    const name = document.getElementById("name").value;
-    if (name == "") {
+    if (employee.name == "") {
         errorHTML += "- Имя сотрудника должно быть задано<br>";
-        document.getElementById("name").style.backgroundColor = '#FFEEEE';
+        //document.getElementById("name").style.backgroundColor = '#FFEEEE';
     }
-    const surname = document.getElementById("surname").value;
-    if (surname == "") {
+    if (employee.surname == "") {
         errorHTML += "- Фамилия сотрудника должна быть задана<br>";
-        document.getElementById("surname").style.backgroundColor = '#FFEEEE';
+        //document.getElementById("surname").style.backgroundColor = '#FFEEEE';
     }
-    document.getElementById("addEmployeeFormErrorMessage")
-        .innerHTML = errorHTML;
-    if (errorHTML.length != 0) return;
-
-    const id = (0,_service__WEBPACK_IMPORTED_MODULE_0__.addEmployee)(name, surname);
-    //add manager ref
-    const managerId = document.getElementById("managerSelect").value;
-    (0,_service__WEBPACK_IMPORTED_MODULE_0__.setEmployeeManager)(id, managerId);
-    showEmployees((0,_service__WEBPACK_IMPORTED_MODULE_0__.getEmployees)());
-
-    document.getElementById("name").value = "";
-    document.getElementById("surname").value = "";
-    addOption(document.getElementById("managerSelect"),
-        { text: name + ' ' + surname, value: id });
+    if (errorHTML.length !== 0) {
+        return `<div id="addEmployeeFormErrorMessage">${errorHTML}</div>`;
+    } else {
+        return errorHTML;
+    }
 }
 
 function removeEmployeeUI(id) {
     (0,_service__WEBPACK_IMPORTED_MODULE_0__.removeEmployee)(id);
     showEmployees((0,_service__WEBPACK_IMPORTED_MODULE_0__.getEmployees)());
-    removeOption(document.getElementById("managerSelect"), id);
+    //removeOption(document.getElementById("managerSelect"), id);
 }
 
 function fillSelect(select, values, selectedValue) {
@@ -381,8 +506,8 @@ function assignSendOnEnter(paneId, buttonId) {
 
 function runUI() {
     showEmployees((0,_service__WEBPACK_IMPORTED_MODULE_0__.getEmployees)());
-    fillSelect(document.getElementById("managerSelect"),
-        getEmployeesOptions());
+    //fillSelect(document.getElementById("managerSelect"),
+    //    getEmployeesOptions());
     document.getElementById("searchButton").click();
     assignSendOnEnter("searchPane", "searchEmployeesButton");
     assignSendOnEnter("addPane", "addEmployeeButton");
@@ -1106,8 +1231,10 @@ var __webpack_exports__ = {};
   \*****************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _employees_ui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./employees/ui */ "./employees/ui.js");
-/* harmony import */ var _style_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./style.css */ "./style.css");
-/* harmony import */ var _model_Employee__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./model/Employee */ "./model/Employee.js");
+/* harmony import */ var _employees_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./employees/service */ "./employees/service.js");
+/* harmony import */ var _style_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./style.css */ "./style.css");
+/* harmony import */ var _model_Employee__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./model/Employee */ "./model/Employee.js");
+
 
 
 
@@ -1115,6 +1242,8 @@ __webpack_require__.r(__webpack_exports__);
 window.addEmployeeUI = _employees_ui__WEBPACK_IMPORTED_MODULE_0__.addEmployeeUI;
 window.openTab = _employees_ui__WEBPACK_IMPORTED_MODULE_0__.openTab;
 window.searchEmployeeUI = _employees_ui__WEBPACK_IMPORTED_MODULE_0__.searchEmployeeUI;
+window.removeEmployeeUI = _employees_ui__WEBPACK_IMPORTED_MODULE_0__.removeEmployeeUI;
+window.setEmployees = _employees_service__WEBPACK_IMPORTED_MODULE_1__.setEmployees;
 
 window.addEventListener("load", _employees_ui__WEBPACK_IMPORTED_MODULE_0__.runUI);
 

@@ -24,5 +24,8 @@
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "css-loader": "^6.5.1",
     "style-loader": "^3.3.1"
+  },
+  "jest": {
+    "testEnvironment": "jsdom"
   }
 }
