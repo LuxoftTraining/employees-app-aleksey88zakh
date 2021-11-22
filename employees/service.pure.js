@@ -25,5 +25,5 @@ export function setDateOfBirth(employee, date) {
 }
 
 export function setEmployeeManager(employee, managerId) {
-    return {...employee, managerRef: managerId}
+    return {...employee, managerRef: Number(managerId)}
 }

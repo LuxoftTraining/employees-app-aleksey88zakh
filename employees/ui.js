@@ -4,7 +4,6 @@ import {
 } from './service';
 import { addEmployee, setEmployeeManager } from './service.pure';
 import { Employee, jsonToEmployees } from "../model/Employee";
-import { DATA } from './employees-json';
 
 const PLACEHOLDER = "employeesPlaceholder";
 const ADD_PANE = "addPane";
@@ -62,14 +61,16 @@ export function addEmployeeUI() {
         html = addEmployeeView(getEmployees(), employeeFromUI);
     } 
 
-    //showEmployees(getEmployees());
     document.getElementById(ADD_PANE).innerHTML = html;
     showEmployees(newEmployees);
     return newEmployees;
 }
 
 export function addEmployeeView(employees, employee) {
-    let errors = errorView(employee);
+    let errors;
+    if (!!employee) {
+        errors = errorView(employee);
+    }
     let html = `<h3>Добавление сотрудника</h3>
         <label for="name">Имя:</label>
         <input id="name" placeholder="Имя">
@@ -115,44 +116,15 @@ function errorView(employee) {
     }
 }
 
+function updateAddEmployeeForm() {
+    let html = addEmployeeView(getEmployees());
+    document.getElementById(ADD_PANE).innerHTML = html;
+}
+
 export function removeEmployeeUI(id) {
     removeEmployee(id);
     showEmployees(getEmployees());
-    //removeOption(document.getElementById("managerSelect"), id);
-}
-
-function fillSelect(select, values, selectedValue) {
-    for (let val of values) {
-        const option = document.createElement("option");
-        option.text = val.text;
-        option.value = val.value;
-        if (selectedValue == option.value) option.selected = true;
-        select.appendChild(option);
-    }
-}
-
-function addOption(select, val) {
-    const option = document.createElement("option");
-    option.text = val.text;
-    option.value = val.value;
-    select.appendChild(option);
-}
-
-function removeOption(select, id) {
-    for (opt of select.childNodes) {
-        if (id === Number(opt.value)) {
-            select.removeChild(opt);
-            break;
-        }
-    }
-}
-
-function getEmployeesOptions() {
-    let options = [];
-    for (let e of getEmployees()) {
-        options.push({ text: e.name + ' ' + e.surname, value: e.id });
-    }
-    return options;
+    updateAddEmployeeForm();
 }
 
 export function searchEmployeeUI() {
@@ -206,8 +178,7 @@ function assignSendOnEnter(paneId, buttonId) {
 
 export function runUI() {
     showEmployees(getEmployees());
-    //fillSelect(document.getElementById("managerSelect"),
-    //    getEmployeesOptions());
+    updateAddEmployeeForm();
     document.getElementById("searchButton").click();
     assignSendOnEnter("searchPane", "searchEmployeesButton");
     assignSendOnEnter("addPane", "addEmployeeButton");
